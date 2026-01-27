@@ -121,6 +121,13 @@
       gap: 10px;
       z-index: 40;
       pointer-events: auto;
+      transition:
+        left .35s cubic-bezier(.4, 0, .2, 1),
+        top .35s cubic-bezier(.4, 0, .2, 1),
+        width .35s cubic-bezier(.4, 0, .2, 1),
+        height .35s cubic-bezier(.4, 0, .2, 1),
+        transform .25s ease,
+        opacity .25s ease;
     }
 
     .chat-panel {
@@ -287,6 +294,13 @@
         width: 92%;
         top: 56%;
         height: 42%;
+        transition:
+          left .35s cubic-bezier(.4, 0, .2, 1),
+          top .35s cubic-bezier(.4, 0, .2, 1),
+          width .35s cubic-bezier(.4, 0, .2, 1),
+          height .35s cubic-bezier(.4, 0, .2, 1),
+          transform .25s ease,
+          opacity .25s ease;
       }
 
       .bubble {
@@ -300,6 +314,67 @@
       .topbar input {
         width: 160px;
       }
+    }
+
+    /* tombol di topbar jadi konsisten */
+    .topbar button {
+      height: 34px;
+      border: none;
+      border-radius: 999px;
+      /* pill */
+      padding: 0 14px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease, color .12s ease;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, .10);
+    }
+
+    .topbar button:active {
+      transform: scale(.98);
+    }
+
+    /* clear */
+    .topbar button.secondary {
+      background: #eef1ff;
+      color: #3b5bdb;
+    }
+
+    .topbar button.secondary:hover {
+      background: #e5e9ff;
+    }
+
+    /* expand */
+    .topbar button.toggle {
+      background: linear-gradient(135deg, #111827, #374151);
+      color: #fff;
+    }
+
+    .topbar button.toggle:hover {
+      box-shadow: 0 12px 22px rgba(0, 0, 0, .16);
+      transform: translateY(-1px);
+    }
+
+    /* state saat expanded */
+    .topbar button.toggle.is-on {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    .chat-ui.expanded {
+      left: 2% !important;
+      width: 96% !important;
+      top: 84px !important;
+      /* biar ga nutup topbar */
+      height: calc(100% - 110px) !important;
+    }
+
+    .chat-ui.expanded .chat-panel {
+      /* panel memenuhi area expanded */
+      flex: 1;
+      border-radius: 18px;
     }
   </style>
 </head>
@@ -326,7 +401,10 @@
         <input id="apiKey" type="password" placeholder="(Optional) API key" />
       </div>
       <button id="clearChat" class="secondary">Clear</button>
-
+      <button id="toggleExpand" class="toggle" type="button">
+        <span class="icon">⤢</span>
+        <span class="label">Expand</span>
+      </button>
       <div class="badge">
         <div>Model: <span id="modelName">-</span></div>
         <div><span id="messageCount">Messages: 0</span></div>
@@ -335,6 +413,7 @@
 
     <!-- DOM chat overlay -->
     <div class="chat-ui" id="chatUI">
+
       <div class="chat-panel" id="chatPanel"></div>
 
       <div class="input-bar">
@@ -599,6 +678,30 @@
     const messageCountEl = document.getElementById("messageCount");
     const modelNameEl = document.getElementById("modelName");
     const toast = document.getElementById("toast");
+
+
+    const chatUI = document.getElementById("chatUI");
+    const toggleExpandBtn = document.getElementById("toggleExpand");
+
+    let isExpanded = false;
+
+    function setExpanded(on) {
+      console.log('tesss')
+      isExpanded = on;
+      chatUI.classList.toggle("expanded", on);
+
+      toggleExpandBtn.classList.toggle("is-on", on);
+      toggleExpandBtn.querySelector(".icon").textContent = on ? "⤡" : "⤢";
+      toggleExpandBtn.querySelector(".label").textContent = on ? "Collapse" : "Expand";
+
+      chatPanel.scrollTop = chatPanel.scrollHeight;
+    }
+
+    toggleExpandBtn.addEventListener("click", () => setExpanded(!isExpanded));
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && isExpanded) setExpanded(false);
+    });
 
     let client = null;
 
